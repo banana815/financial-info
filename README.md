@@ -28,10 +28,10 @@ Comprehensive historical data for the Effective Federal Funds Rate, Federal Fund
 | File | Description | Date Range | Records |
 |------|-------------|------------|---------|
 | `FOMC_Rate_Decisions.csv` | Official FOMC rate decisions | 2003-2026 | 192 |
-| `FOMC_Rate_Decisions_Extended.csv` | Extended FOMC decisions (derived + official) | 1982-2026 | 317 |
-| `FOMC_Meeting_Calendars.csv` | FOMC meeting schedule | 2021-2027 | 56 |
-| `FOMC_communications_vtasca.csv` | FOMC statements and minutes (full text) | 2000-2026 | 467 |
-| `final_fed_data.csv` | FOMC meeting-level data with analysis | 1993-2021 | 247 |
+| `FOMC_Rate_Decisions_Extended.csv` | All FOMC meetings 1982-2026 (pre-2003 derived from DFEDTAR) | 1982-2026 | 453 |
+| `FOMC_Meeting_Calendars.csv` | FOMC meeting schedule (all official meetings since 1960) | 1960-2027 | 674 |
+| `FOMC_communications_vtasca.csv` | FOMC statements and minutes (full text, official archive) | 1994-2026 | 524 |
+| `final_fed_data.csv` | FOMC meeting-level data with analysis (static research snapshot) | 1993-2021 | 247 |
 
 ### Supplementary Economic Data (from FRED)
 
@@ -103,7 +103,11 @@ _此节由 `scripts/update_data.py` 自动生成，每日定时刷新。_
 - Before December 2008, the Fed set a single target rate (not a range)
 - The target range system began on December 16, 2008
 - The zero lower bound period lasted from December 2008 to December 2015
-- Pre-2003 FOMC decisions in the extended file are derived from DFEDTAR rate changes
+- Pre-2003 FOMC decisions in the extended file are derived from DFEDTAR rate changes; from 2003 they are official decisions, and from 1994 statements/minutes are official archive text
+- FOMC post-meeting statements only became routine from 2000; 1994-1999 statements exist only for policy-action meetings (1996-02 to 1999-05 no statements were published). Minutes exist for every meeting since 1994
+- Meeting calendars cover all official FOMC meetings 1960-2027 (1960-1981 meetings were more frequent; 1982-2020 from the Fed's fomchistorical archive, 2021+ from fomccalendars)
+- `FOMC_Rate_Decisions.csv` covers official decisions 2003+; `FOMC_Rate_Decisions_Extended.csv` covers every meeting 1982-2026 (before Sep 1982 DFEDTAR data does not exist)
+- `final_fed_data.csv` is a static research/analysis snapshot (1993-2021) requiring the original modeling pipeline to extend; it is not refreshed daily
 - Note: the `cumulative_change_since_2003` column in `FOMC_Rate_Decisions.csv` is a historical snapshot and does not strictly follow a running-sum rule in all periods (only 2026 rows are maintained consistently by the auto-update)
 - All FRED series files are refreshed daily from FRED's official CSV endpoint (previously the Quandl snapshot only went up to 2021)
 

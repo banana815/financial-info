@@ -552,10 +552,10 @@ TARGET_TABLE = [
 
 FOMC_TABLE = [
     ("FOMC_Rate_Decisions.csv", "Official FOMC rate decisions"),
-    ("FOMC_Rate_Decisions_Extended.csv", "Extended FOMC decisions (derived + official)"),
-    ("FOMC_Meeting_Calendars.csv", "FOMC meeting schedule"),
-    ("FOMC_communications_vtasca.csv", "FOMC statements and minutes (full text)"),
-    ("final_fed_data.csv", "FOMC meeting-level data with analysis"),
+    ("FOMC_Rate_Decisions_Extended.csv", "All FOMC meetings 1982-2026 (pre-2003 derived from DFEDTAR)"),
+    ("FOMC_Meeting_Calendars.csv", "FOMC meeting schedule (all official meetings since 1960)"),
+    ("FOMC_communications_vtasca.csv", "FOMC statements and minutes (full text, official archive)"),
+    ("final_fed_data.csv", "FOMC meeting-level data with analysis (static research snapshot)"),
 ]
 
 
