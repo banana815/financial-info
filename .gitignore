@@ -19,6 +19,11 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Auto-update runtime
+logs/
+.cache/
+
 # Large files (FOMC communications is 12MB - track with git-lfs if needed)
 # FOMC_communications_vtasca.csv
 .claude/
+.reasonix/

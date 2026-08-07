@@ -1,0 +1,5 @@
+# Financial-info 每日数据更新定时任务
+# 每日 08:45（北京时间）运行；EFFR/DFF 数据在美东每日下午更新完毕，此时可抓到前一日完整数据。
+# 安装: bash scripts/install_cron.sh
+# 或手动: crontab cron/financial-info-daily.cron
+45 8 * * * cd /home/nietzsche/financial-info && /usr/bin/python3 scripts/update_data.py >> logs/update.log 2>&1
