@@ -4,6 +4,8 @@ on:
   schedule:
     # UTC 00:15 = 北京时间 08:15，此时 FRED 前一日数据已发布
     - cron: '15 0 * * *'
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:

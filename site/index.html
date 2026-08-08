@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Federal Funds Rate &amp; FOMC Data</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+         margin: 0; background: #f6f8fa; color: #24292f; }
+  header { background: #0d1117; color: #fff; padding: 28px 24px; }
+  header h1 { margin: 0 0 6px; font-size: 24px; }
+  header p { margin: 0; color: #8b949e; }
+  main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+  .status { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .status div { background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+                 padding: 14px 18px; flex: 1; min-width: 180px; }
+  .status span { display: block; color: #57606a; font-size: 12px; margin-bottom: 4px; }
+  .status b { font-size: 20px; }
+  table { width: 100%; border-collapse: collapse; background: #fff;
+          border: 1px solid #d0d7de; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eaeef2; }
+  th { background: #f6f8fa; font-size: 13px; }
+  td { font-size: 14px; }
+  a { color: #0969da; text-decoration: none; }
+  footer { text-align: center; color: #57606a; font-size: 12px; padding: 24px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Federal Funds Rate &amp; FOMC Data Collection</h1>
+  <p>Effective Federal Funds Rate · target range · FOMC decisions/statements/minutes</p>
+</header>
+<main>
+
+    <div class="status">
+      <div><span>Target Range</span><b>3.50% – 3.75%</b></div>
+      <div><span>EFFR (as of 2026-08-05)</span><b>3.63%</b></div>
+      <div><span>Updated</span><b>2026-08-08</b></div>
+    </div>
+  <h2>Data Files</h2>
+  <table>
+    <tr><th>File</th><th>Description</th><th>Date Range</th><th>Records</th></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/Master_Federal_Funds_Rate_Daily.csv'>Master_Federal_Funds_Rate_Daily.csv</a></td><td>Combined daily rate with target range</td><td>1976-05-31 → 2026-08-05</td><td style='text-align:right'>18,303</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/DFF_federal_funds_effective_rate_daily.csv'>DFF_federal_funds_effective_rate_daily.csv</a></td><td>Effective Federal Funds Rate (DFF)</td><td>1954-07-01 → 2026-08-05</td><td style='text-align:right'>26,334</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/EFFR_simplified.csv'>EFFR_simplified.csv</a></td><td>EFFR simplified (rate + target range)</td><td>2000-07-03 → 2026-08-05</td><td style='text-align:right'>6,557</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/EFFR_nyfed_with_target_range.csv'>EFFR_nyfed_with_target_range.csv</a></td><td>EFFR from NY Fed (all columns)</td><td>2000-07-03 → 2026-08-05</td><td style='text-align:right'>6,557</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/DFEDTAR_target_range_from_nyfed.csv'>DFEDTAR_target_range_from_nyfed.csv</a></td><td>Target range extracted from EFFR data</td><td>2008-12-16 → 2026-08-05</td><td style='text-align:right'>4,431</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/FOMC_Rate_Decisions.csv'>FOMC_Rate_Decisions.csv</a></td><td>Official FOMC rate decisions (2003+)</td><td>2003-01-29 → 2026-07-29</td><td style='text-align:right'>192</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/FOMC_Rate_Decisions_Extended.csv'>FOMC_Rate_Decisions_Extended.csv</a></td><td>All FOMC meetings 1982-2026</td><td>1982-10-01 → 2026-07-29</td><td style='text-align:right'>453</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/FOMC_Meeting_Calendars.csv'>FOMC_Meeting_Calendars.csv</a></td><td>FOMC meeting schedule (1960-2027)</td><td>1960 → 2027</td><td style='text-align:right'>674</td></tr>
+<tr><td><a href='https://raw.githubusercontent.com/banana815/financial-info/main/FOMC_communications_vtasca.csv'>FOMC_communications_vtasca.csv</a></td><td>FOMC statements &amp; minutes (1994-2026)</td><td>1994-02-03 → 2026-07-29</td><td style='text-align:right'>524</td></tr>
+
+  </table>
+  <footer>Auto-generated from the repository CSV files · 每日由 GitHub Actions 自动更新</footer>
+</main>
+</body>
+</html>
