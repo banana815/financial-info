@@ -2,7 +2,7 @@
 # Source: Federal Reserve via FRED (DFF)
 # Primary URL: https://fred.stlouisfed.org/series/DFF
 # Canonical: https://calcfi.app/data/interest-rates/federal-funds-rate
-# Retrieved: 2026-08-08T01:11:36.931025Z
+# Retrieved: 2026-08-08T01:36:46.226685Z
 # License: CC-BY-4.0 (attribute to CalcFi + primary source when citing)
 date,value,unit
 1954-07-01,1.13,percent
