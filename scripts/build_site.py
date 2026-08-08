@@ -34,12 +34,20 @@ def fval(s):
         return None
 
 
+def pct_change(values, lag):
+    """环比(lag=1)/同比(lag=12) 变化率 %。返回与 values 等长（前 lag 个为 None）。"""
+    out = [None] * len(values)
+    for i in range(lag, len(values)):
+        if values[i] is not None and values[i - lag]:
+            out[i] = round((values[i] / values[i - lag] - 1) * 100, 2)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # 图表数据
 # ---------------------------------------------------------------------------
 
 def master_data():
-    """Master: date, rate, target_low, target_high（target 仅 2008+ 区间制有值）"""
     rows = read_csv_rows(os.path.join(ROOT, "Master_Federal_Funds_Rate_Daily.csv"))
     dates, rate, low, high = [], [], [], []
     for r in rows:
@@ -51,7 +59,6 @@ def master_data():
 
 
 def effr_data():
-    """EFFR_simplified: date, rate, target_low, target_high"""
     rows = read_csv_rows(os.path.join(ROOT, "EFFR_simplified.csv"))
     dates, rate, low, high = [], [], [], []
     for r in rows:
@@ -63,34 +70,41 @@ def effr_data():
 
 
 def fomc_data():
-    """Extended: date, change_bp, target_low（阶梯用）"""
     rows = read_csv_rows(os.path.join(ROOT, "FOMC_Rate_Decisions_Extended.csv"))
     dates, change, target = [], [], []
     for r in rows:
         dates.append(r[0])
         change.append(int(r[2]) if r[2].lstrip("-").isdigit() else 0)
         tr = r[3]
-        if "-" in tr:
-            low = tr.split("-")[0]
-        else:
-            low = tr
+        low = tr.split("-")[0] if "-" in tr else tr
         target.append(fval(low))
     return {"dates": dates, "change": change, "target": target}
 
 
-def supp_data():
-    """补充经济数据：CPI、失业率、非农、核心 PCE"""
+def econ_data():
+    """全部补充经济指标：原值 + CPI 环比/同比。"""
     out = {}
-    for sid, title in [("FRED_CPIAUCSL.csv", "CPI (同比, %)"),
-                       ("FRED_UNRATE.csv", "失业率 (%)"),
-                       ("FRED_PAYEMS.csv", "非农就业 (千人)"),
-                       ("FRED_PCEPILFE.csv", "核心 PCE (指数)")]:
-        rows = read_csv_rows(os.path.join(ROOT, sid))
-        out[sid] = {
-            "title": title,
-            "dates": [r[0] for r in rows],
-            "values": [fval(r[1]) for r in rows],
-        }
+    spec = {
+        "FRED_CPIAUCSL.csv": "CPI",
+        "FRED_UNRATE.csv": "UNRATE",
+        "FRED_GDPC1.csv": "GDPC1",
+        "FRED_GDPPOT.csv": "GDPPOT",
+        "FRED_PAYEMS.csv": "PAYEMS",
+        "FRED_PCEPILFE.csv": "PCEPILFE",
+        "FRED_HSN1F.csv": "HSN1F",
+        "FRED_RRSFS.csv": "RRSFS",
+    }
+    for fname in spec:
+        rows = read_csv_rows(os.path.join(ROOT, fname))
+        dates = [r[0] for r in rows]
+        values = [fval(r[1]) for r in rows]
+        d = {"title": spec[fname], "dates": dates, "value": values}
+        if fname == "FRED_CPIAUCSL.csv":
+            d["mom"] = pct_change(values, 1)
+            d["yoy"] = pct_change(values, 12)
+        if fname == "FRED_PCEPILFE.csv":
+            d["yoy"] = pct_change(values, 12)
+        out[fname] = d
     return out
 
 
@@ -108,9 +122,8 @@ def chart_html(div_id, height):
 
 
 def build():
-    master, effr, fomc, supp = master_data(), effr_data(), fomc_data(), supp_data()
+    master, effr, fomc, econ = master_data(), effr_data(), fomc_data(), econ_data()
 
-    # Current status 卡片
     status = {}
     try:
         effr_rows = read_csv_rows(os.path.join(ROOT, "FRED_DFF.csv"))
@@ -150,6 +163,16 @@ def build():
       <div><span>Updated</span><b>{html.escape(status['date'])}</b></div>
     </div>"""
 
+    # 经济指标小图（2 列网格）
+    econ_grid = ""
+    for div_id, height in [
+        ("econ-cpi-mom", 220), ("econ-cpi-yoy", 220),
+        ("econ-unrate", 220), ("econ-payems", 220),
+        ("econ-gdp", 220), ("econ-pce", 220),
+        ("econ-hsn1f", 220), ("econ-rrsfs", 220),
+    ]:
+        econ_grid += chart_html(div_id, height)
+
     page = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -186,20 +209,20 @@ def build():
 <body>
 <header>
   <h1>Federal Funds Rate &amp; FOMC Data Collection</h1>
-  <p>Effective Federal Funds Rate · target range · FOMC decisions · 交互图表（可缩放）</p>
+  <p>Effective Federal Funds Rate · target range · FOMC decisions · 宏观经济指标 · 交互图表（可缩放）</p>
 </header>
 <main>
 {status_html}
-  <h2>📈 数据走势图</h2>
+  <h2>📈 利率与 FOMC</h2>
   {chart_html("chart-master", 460)}
-  {chart_html("chart-effr", 460)}
+  {chart_html("chart-effr", 440)}
+  {chart_html("chart-fomc", 420)}
+
+  <h2>📊 宏观经济指标</h2>
   <div class="grid">
-    {chart_html("chart-fomc", 400)}
-    <div>
-      {chart_html("chart-cpi", 190)}
-      {chart_html("chart-unrate", 190)}
-    </div>
+{econ_grid}
   </div>
+
   <h2>数据文件</h2>
   <table>
     <tr><th>File</th><th>Description</th><th>Date Range</th><th>Records</th></tr>
@@ -211,7 +234,7 @@ def build():
 <script type="application/json" id="data-master">{js(master)}</script>
 <script type="application/json" id="data-effr">{js(effr)}</script>
 <script type="application/json" id="data-fomc">{js(fomc)}</script>
-<script type="application/json" id="data-supp">{js(supp)}</script>
+<script type="application/json" id="data-econ">{js(econ)}</script>
 
 <script>
 (function () {{
@@ -229,6 +252,16 @@ def build():
     dragmode: "zoom",
     uirevision: "fixed"
   }};
+  const smallLayout = Object.assign({{}}, baseLayout, {{
+    showlegend: false,
+    xaxis: {{ type: "date", rangeslider: {{ visible: false }} }},
+    margin: {{ l: 50, r: 14, t: 34, b: 30 }}
+  }});
+
+  function line(x, y, name, color, width) {{
+    return {{ x: x, y: y, name: name, mode: "lines",
+              line: {{ color: color, width: width || 1.4 }} }};
+  }}
 
   // 图1：有效联邦基金利率 1976-2026 + 目标区间
   const m = get("data-master");
@@ -237,60 +270,75 @@ def build():
        hoverinfo: "skip", fill: "none" }},
     {{ x: m.dates, y: m.high, mode: "lines", line: {{ width: 0 }}, showlegend: false,
        hoverinfo: "skip", fill: "tonexty", fillcolor: "rgba(30,136,229,0.15)" }},
-    {{ x: m.dates, y: m.rate, name: "有效联邦基金利率 (DFF/EFFR)", mode: "lines",
-       line: {{ color: "#1f77b4", width: 1.2 }} }}
+    line(m.dates, m.rate, "有效联邦基金利率 (DFF/EFFR)", "#1f77b4", 1.2)
   ], Object.assign({{}}, baseLayout, {{
-    title: "联邦基金有效利率与目标区间 (1976-2026)",
-    yaxis: {{ title: "%" }}
+    title: "联邦基金有效利率与目标区间 (1976-2026)", yaxis: {{ title: "%" }}
   }}));
 
   // 图2：EFFR + 目标区间（2000+）
   const e = get("data-effr");
   Plotly.newPlot("chart-effr", [
-    {{ x: e.dates, y: e.low, mode: "lines", line: {{ color: "rgba(30,136,229,0.25)", width: 1 }},
-       name: "目标区间下限", fill: "none" }},
-    {{ x: e.dates, y: e.high, mode: "lines", line: {{ color: "rgba(30,136,229,0.25)", width: 1 }},
-       name: "目标区间上限", fill: "tonexty", fillcolor: "rgba(30,136,229,0.12)" }},
-    {{ x: e.dates, y: e.rate, name: "EFFR", mode: "lines",
-       line: {{ color: "#d32f2f", width: 1.4 }} }}
+    line(e.dates, e.low, "目标区间下限", "rgba(30,136,229,0.25)", 1),
+    {{ x: e.dates, y: e.high, mode: "lines", name: "目标区间上限",
+       line: {{ color: "rgba(30,136,229,0.25)", width: 1 }},
+       fill: "tonexty", fillcolor: "rgba(30,136,229,0.12)" }},
+    line(e.dates, e.rate, "EFFR", "#d32f2f", 1.4)
   ], Object.assign({{}}, baseLayout, {{
-    title: "EFFR 与目标区间 (2000-2026)",
-    yaxis: {{ title: "%" }}
+    title: "EFFR 与目标区间 (2000-2026)", yaxis: {{ title: "%" }}
   }}));
 
-  // 图3：FOMC 利率决议（升降息柱状 + 目标利率阶梯）
+  // 图3：FOMC 利率决议
   const f = get("data-fomc");
   const colors = f.change.map(c => c > 0 ? "#d32f2f" : (c < 0 ? "#2e7d32" : "#9e9e9e"));
   Plotly.newPlot("chart-fomc", [
     {{ x: f.dates, y: f.change, type: "bar", name: "利率变动 (bp)",
        marker: {{ color: colors }}, yaxis: "y2" }},
-    {{ x: f.dates, y: f.target, mode: "lines", name: "目标利率 (%)",
-       line: {{ color: "#1565c0", width: 1.6, shape: "hv" }} }}
+    line(f.dates, f.target, "目标利率 (%)", "#1565c0", 1.6)
   ], Object.assign({{}}, baseLayout, {{
     title: "FOMC 利率决议 (1982-2026)",
     yaxis: {{ title: "目标利率 (%)" }},
-    yaxis2: {{ title: "变动 (bp)", overlaying: "y", side: "right", showgrid: false }},
-    barmode: "overlay"
+    yaxis2: {{ title: "变动 (bp)", overlaying: "y", side: "right", showgrid: false }}
   }}));
 
-  // 图4-5：补充经济数据（CPI / 失业率 2x2 上半部分）
-  const s = get("data-supp");
-  function smallChart(id, key, color, title) {{
-    const d = s[key];
-    Plotly.newPlot(id, [
-      {{ x: d.dates, y: d.values, mode: "lines", name: title,
-         line: {{ color: color, width: 1.4 }} }}
-    ], Object.assign({{}}, baseLayout, {{
-      title: title, showlegend: false,
-      xaxis: {{ type: "date", rangeslider: {{ visible: false }} }},
-      margin: {{ l: 50, r: 14, t: 34, b: 30 }}
+  // 经济指标小图
+  const s = get("data-econ");
+  function smallChart(id, traces, title, ylabel) {{
+    Plotly.newPlot(id, traces, Object.assign({{}}, smallLayout, {{
+      title: title, yaxis: {{ title: ylabel || "" }}
     }}));
   }}
-  smallChart("chart-cpi", "FRED_CPIAUCSL.csv", "#8e24aa", "CPI (同比, %)");
-  smallChart("chart-unrate", "FRED_UNRATE.csv", "#ef6c00", "失业率 (%)");
+
+  smallChart("econ-cpi-mom",
+    [line(s["FRED_CPIAUCSL.csv"].dates, s["FRED_CPIAUCSL.csv"].mom, "CPI 环比", "#8e24aa", 1.3)],
+    "CPI 环比增长 (MoM, %)", "%");
+  smallChart("econ-cpi-yoy",
+    [line(s["FRED_CPIAUCSL.csv"].dates, s["FRED_CPIAUCSL.csv"].yoy, "CPI 同比", "#c2185b", 1.3)],
+    "CPI 同比增长 (YoY, %)", "%");
+  smallChart("econ-unrate",
+    [line(s["FRED_UNRATE.csv"].dates, s["FRED_UNRATE.csv"].value, "失业率", "#ef6c00", 1.3)],
+    "失业率 (UNRATE, %)", "%");
+  smallChart("econ-payems",
+    [line(s["FRED_PAYEMS.csv"].dates, s["FRED_PAYEMS.csv"].value, "非农就业", "#2e7d32", 1.3)],
+    "非农就业 (PAYEMS, 千人)", "千人");
+  smallChart("econ-gdp",
+    [line(s["FRED_GDPC1.csv"].dates, s["FRED_GDPC1.csv"].value, "实际 GDP", "#1565c0", 1.3),
+     line(s["FRED_GDPPOT.csv"].dates, s["FRED_GDPPOT.csv"].value, "潜在 GDP", "#90a4ae", 1.1)],
+    "实际 GDP vs 潜在 GDP (十亿美元)", "十亿美元");
+  smallChart("econ-pce",
+    [line(s["FRED_PCEPILFE.csv"].dates, s["FRED_PCEPILFE.csv"].value, "核心 PCE", "#6a1b9a", 1.3),
+     line(s["FRED_PCEPILFE.csv"].dates, s["FRED_PCEPILFE.csv"].yoy, "同比", "#ce93d8", 1.1)],
+    "核心 PCE 指数 (PCEPILFE)", "指数");
+  smallChart("econ-hsn1f",
+    [line(s["FRED_HSN1F.csv"].dates, s["FRED_HSN1F.csv"].value, "住房开工", "#00838f", 1.3)],
+    "住房开工 (HSN1F, 千套)", "千套");
+  smallChart("econ-rrsfs",
+    [line(s["FRED_RRSFS.csv"].dates, s["FRED_RRSFS.csv"].value, "零售销售", "#5d4037", 1.3)],
+    "实际零售销售 (RRSFS, 指数)", "指数");
 
   window.addEventListener("resize", () => {{
-    ["chart-master", "chart-effr", "chart-fomc", "chart-cpi", "chart-unrate"]
+    ["chart-master", "chart-effr", "chart-fomc",
+     "econ-cpi-mom", "econ-cpi-yoy", "econ-unrate", "econ-payems",
+     "econ-gdp", "econ-pce", "econ-hsn1f", "econ-rrsfs"]
       .forEach(id => Plotly.Plots.resize(document.getElementById(id)));
   }});
 }})();
