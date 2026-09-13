@@ -19,8 +19,8 @@ Comprehensive historical data for the Effective Federal Funds Rate, Federal Fund
 | File | Description | Frequency | Date Range | Records |
 |------|-------------|-----------|------------|---------|
 | `FRED_DFEDTAR.csv` | Target Federal Funds Rate (single rate, pre-2008) | Daily | 1982-2008 | 9,577 |
-| `FRED_DFEDTARL.csv` | Target Range Lower Limit (post-2008) | Daily | 2008-2026 | 6,479 |
-| `FRED_DFEDTARU.csv` | Target Range Upper Limit (post-2008) | Daily | 2008-2026 | 6,479 |
+| `FRED_DFEDTARL.csv` | Target Range Lower Limit (post-2008) | Daily | 2008-2026 | 6,480 |
+| `FRED_DFEDTARU.csv` | Target Range Upper Limit (post-2008) | Daily | 2008-2026 | 6,480 |
 | `DFEDTAR_target_range_from_nyfed.csv` | Target range extracted from NY Fed EFFR data | Daily | 2008-2026 | 4,456 |
 
 ### FOMC Data
@@ -89,7 +89,7 @@ Comprehensive historical data for the Effective Federal Funds Rate, Federal Fund
 | DFEDTARL | Federal Funds Target Range - Lower Limit | Daily |
 | DFEDTARU | Federal Funds Target Range - Upper Limit | Daily |
 
-## Current Status (as of 2026-09-12)
+## Current Status (as of 2026-09-13)
 
 - **Target Range**: 3.50% – 3.75%
 - **Effective Rate (EFFR)**: 3.63% (as of 2026-09-10)
